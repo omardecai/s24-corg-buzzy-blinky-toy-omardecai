@@ -1,42 +1,56 @@
-//Alternate LEDs from Off, Green, and Red
 #include <msp430.h>
 #include "libTimer.h"
 #include "led.h"
 
 int main(void) {
-  P1DIR |= LEDS;
-  P1OUT &= ~LED_GREEN;
-  P1OUT |= LED_RED;
+  P1DIR |= LEDS; // Set LED pins as outputs
+  P1OUT &= ~LEDS; // Ensure all LEDs are initially turned off
 
-  configureClocks();		/* setup master oscillator, CPU & peripheral clocks */
-  enableWDTInterrupts();	/* enable periodic interrupt */
+  configureClocks(); // Setup master oscillator, CPU & peripheral clocks
+  enableWDTInterrupts(); // Enable periodic interrupt
   
-  or_sr(0x18);			/* CPU off, GIE on */
+  or_sr(0x18); // CPU off, GIE on
 }
 
-// global state vars that control blinking
-int blinkLimit = 5;  // duty cycle = 1/blinkLimit
-int blinkCount = 0;  // cycles 0...blinkLimit-1
-int secondCount = 0; // state var representing repeating time 0…1s
+// Global state variables
+int greenBlinkLimit = 5; // Duty cycle for green LED
+int redBlinkLimit = 5; // Duty cycle for red LED
+int greenBlinkCount = 0; // Counter for green LED
+int redBlinkCount = 0; // Counter for red LED
+int secondCount = 0; // Counter for seconds
 
-void
-__interrupt_vec(WDT_VECTOR) WDT()	/* 250 interrupts/sec */
-{
-  // handle blinking 
-  blinkCount ++;
-  if (blinkCount >= blinkLimit) { // on for 1 interrupt period
-    blinkCount = 0;
-    P1OUT |= LED_GREEN;
-  } else		          // off for blinkLimit - 1 interrupt periods
-    P1OUT &= ~LED_GREEN;
-
-  // measure a second
-  secondCount ++;
-  if (secondCount >= 250) {  // once each second
-    secondCount = 0;
-    blinkLimit ++;	     // reduce duty cycle
-    if (blinkLimit >= 8)     // but don't let duty cycle go below 1/7.
-      blinkLimit = 0;
+void __interrupt_vec(WDT_VECTOR) WDT() {
+  // Handle green LED blinking
+  greenBlinkCount++;
+  if (greenBlinkCount >= greenBlinkLimit) {
+    greenBlinkCount = 0;
+    P1OUT ^= LED_GREEN; // Toggle green LED
   }
-} 
+  
+  // Handle red LED blinking
+  redBlinkCount++;
+  if (redBlinkCount >= redBlinkLimit) {
+    redBlinkCount = 0;
+    P1OUT ^= LED_RED; // Toggle red LED
+  }
+  
+  // Increment second counter
+  secondCount++;
+  
+  // Modify blink duty cycle once each second
+  if (secondCount >= 250) {
+    secondCount = 0;
+    
+    // Change the blink duty cycle for green LED (dim-to-bright)
+    greenBlinkLimit++;
+    if (greenBlinkLimit > 10) // Maximum duty cycle
+      greenBlinkLimit = 5; // Reset to dim
+  
+    // Change the blink duty cycle for red LED (bright-to-dim)
+    redBlinkLimit--;
+    if (redBlinkLimit < 0) // Minimum duty cycle
+      redBlinkLimit = 5; // Reset to bright
+  }
+}
+
 

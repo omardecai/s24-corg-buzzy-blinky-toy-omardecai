@@ -15,3 +15,9 @@ This program implements mutliple state machines
 * Simultaneously bink the red & green leds with independent brightness patterns.
 
 * Change the speed that the brighness patterns change (faster or slower).
+
+## Modifications 
+
+* Added red and green blinking with independent brighntess patterns.
+
+* Changed speed that the brightness patterns change

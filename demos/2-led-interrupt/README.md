@@ -11,3 +11,7 @@ on the red LED.
 * Modify so that different combinations of LEDs are illuminated.
 
 * Try to modify the interrupt handler so that an LED flashes on and off quickly (and thereby appears dimmer).
+
+## Modifications
+
+* Modified to interrupt red LED faster to appear dimmer

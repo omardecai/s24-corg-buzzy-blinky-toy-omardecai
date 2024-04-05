@@ -14,10 +14,15 @@ int main(void) {
   or_sr(0x18);		/* CPU off, GIE on */
 }
 
+int secondCount = 0;
 
 void
 __interrupt_vec(WDT_VECTOR) WDT()	/* 250 interrupts/sec */
 {
-  P1OUT |= LED_GREEN;
+  secondCount++;
+  if (secondCount >= 3)
+  {
+      P1OUT |= LED_GREEN;
+  }
 } 
 
